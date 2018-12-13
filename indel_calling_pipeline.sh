@@ -1,5 +1,10 @@
 #!/bin/sh
 
+function error_exit {
+    echo "$1" >&2   ## Send message to stderr. Exclude >&2 if you don't want it that way.
+    exit "${2:-1}"  ## Return a code specified by $2 or 1 by default.
+}
+
 if [ "$#" -ne 5 ] 
   then
 echo "Usage: $0 full_sample_name full/path/to/job/dir full/path/to/genome/prefix (requires the following file types: .fa, .2bit, and .bt2)  min_cov_at_indel full/path/to/scripts " >&2
@@ -35,6 +40,8 @@ min_reads_at_alt=`echo $cov | perl -MList::Util -lane 'print List::Util::max(1,$
 
 ##create directories for storing output files
 mkdir -p $job_dir/{genome_files,text_files,fastq}
+
+[ `find $job_dir/BAM/ -name $s*rmdup*.bam | wc -l` ==  0 ] &&  error_exit "BAM file doesn't exist in $job_dir/BAM. Make sure the file name has the proper format. See README.txt"
 
 echo "Indexing BAM file"
 bam=`ls $job_dir/BAM/$s*rmdup*.bam`
@@ -105,3 +112,5 @@ echo "Final step: run Varscan mpileup2indel on BAM"
 java -Xmx4g -Djava.io.tmpdir=$java_tmp_dir_for_varscan -jar $path_to_varscan mpileup2indel $job_dir/text_files/$s"_mpileup" --min-var-freq 0.2 --min-coverage $cov> $job_dir/text_files/$s"_mpileup2indel_varscan"
 
 echo "Pipeline finished. The main output files of interest are: $job_dir/text_files/"$s"_mpileup2indel_varscan and  $job_dir/BAM/for_mpileup.indel_realigned_and_filtered."$s".bam.  All other intermediate files were kept for troubleshooting purposes only."
+
+
