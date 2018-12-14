@@ -9,6 +9,7 @@ INDEL CALLING PIPELINE STEPS
 2. These scripts/executables must be placed in a directory that you will specify when running the pipeline:
 
 GenomAnalysisTK.jar
+VarScan.v2.4.0.jar
 AddOrReplaceReadGroups.jar
 pull_indel_candidates_from_SAM_file.pl (in-house script)
 create_custom_fasta_with_indel_081516.pl (in-house script)
